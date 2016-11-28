@@ -18,7 +18,7 @@ void setup() {
 
 void loop() {
   digitalWrite(13, link.online);
-  if(link.st0(100))
+  if(link.st0(10))
     link.Read();
 }
 

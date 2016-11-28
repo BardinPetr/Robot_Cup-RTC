@@ -1,10 +1,4 @@
-/*
-  Name:    Ecat_Transmitter.ino
-  Created: 21.11.2016 16:06:28
-  Author:  Petr
-*/
-
-#include <Enotik.h>
+#include <catlink.h>
 
 #define BTN1            2
 #define BTN2            3
@@ -20,6 +14,7 @@
 
 bool sflag = false;
 
+CatLink link(0x22);
 
 int BTNID() {
   if (digitalRead(BTN1)) return 1;
@@ -45,26 +40,34 @@ void setup()
 
   Serial.begin(9600);
 
-  //Enotik.init_slave(0x55);
-  Enotik.init_master(0x55);
+  link.bind(1, RecData);
 }
 
 void loop()
 {
   bool state = BTNID();
 
-  if (state > 0 && state < 6) {
-    Enotik.send_message(3, state, 0);
+  if (link.st0(200)){
+    link.Read();
   }
-  else if (state < 10) {
-    Enotik.send_message(2, state, 0);
+  
+  if (link.st1(10)) {
+    if (state > 0 && state < 6) {
+      link.Send(3, state, 0);
+    }
+    else if (state < 10) {
+      link.Send(2, state, 0);
+    }
+    else {
+      DriveSend();
+    }
   }
-  else {
-    DriveSend();
-  }
+  
+  digitalWrite(13, link.online);
+}
 
-  digitalWrite(13, Enotik.online);
-  Enotik.work();
+void RecData(byte i1, byte i2) {
+
 }
 
 void DriveSend()
@@ -91,5 +94,5 @@ void DriveSend()
   motor1 = map(motor1, -255, 255, 0, 255);
   motor2 = map(motor2, -255, 255, 0, 255);
 
-  Enotik.send_message(1, motor1, motor2);
+  link.Send(1, motor1, motor2);
 }
