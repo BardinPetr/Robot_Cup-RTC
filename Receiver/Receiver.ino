@@ -4,17 +4,17 @@
 //RANGES FOR SERVOS
 #define cMIN 0
 #define cMAX 90
-#define uNIN 90
+#define uMIN 90
 #define uMAX 180
 
 //INCLUDE
 #include <catlink.h>
 #include <Servo.h>
-#include "DualVNH5019MotorShield.h"
+#include "DualVNH5019MotorShieldMega.h"
 
 DualVNH5019MotorShield mot;
-CatLink link(0x22);
-Servo man;
+CatLink link(0x22, Serial);
+//Servo man;
 
 //SERVO VARs
 int cservo = 0;
@@ -27,12 +27,13 @@ bool lightflag = 0;
 
 void setup() {
   Serial.begin(9600);
+  Serial1.begin(9600);
 
   pinMode(13, OUTPUT);
   pinMode(LIGHTPIN, OUTPUT);
 
   mot.init();
-  man.attach(SERVOPIN);
+  //man.attach(SERVOPIN);
 
   link.bind(1, Drive);
   link.bind(2, RunM);
@@ -40,9 +41,14 @@ void setup() {
 }
 
 void loop() {
-  digitalWrite(13, link.online);
+  //digitalWrite(13, link.online);
   if (link.st0(10)) {
     link.Read();
+    Drive(link.package[1], link.package[2]);
+    //Serial.print(link.package[1]);
+    //Serial.print(" ");
+    //Serial.println(link.package[2]);
+    
   }
 
   Activity();
@@ -50,6 +56,7 @@ void loop() {
 
 void Drive(byte speed1, byte speed2)
 {
+  digitalWrite(13, 1);
   speed1 = (int)((speed1 - 127) * 3.15);
   speed2 = (int)((speed2 - 127) * 3.15);
 
@@ -114,28 +121,28 @@ void Catch() {
   cservo += 10;
   if (cservo > cMAX) cservo = cMAX;
 
-  man.write(cservo);
+  //man.write(cservo);
 }
 
 void Release() {
   cservo -= 10;
   if (cservo < cMIN) cservo = cMIN;
 
-  man.write(cservo);
+  //man.write(cservo);
 }
 
 void Up() {
   uservo += 10;
   if (uservo > uMAX) uservo = uMAX;
 
-  man.write(uservo);
+  //man.write(uservo);
 }
 
 void Down() {
   uservo -= 10;
   if (uservo < uMIN) uservo = uMIN;
 
-  man.write(uservo);
+  //man.write(uservo);
 }
 
 void light_on() {digitalWrite(LIGHTPIN, 1);}
