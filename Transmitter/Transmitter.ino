@@ -22,7 +22,7 @@ bool sflag = false;
 
 SoftwareSerial sr(3,2);
 
-CatLink link(0x22, sr);
+CatLink link(0x22);
 
 int BTNID() {
   if (!digitalRead(BTN1)) return 1;
@@ -58,22 +58,22 @@ void setup()
 
 void loop()
 {
-  int state = 0;//BTNID();
+  int state = BTNID();
 
   if (link.st0(200)){
     link.Read();
   }
   
   if (link.st1(10)) {
-    //if (state > 0 && state < 6) {
-    //  link.Send(3, state, 0);
-    //}
-    //else if (state < 10) {
-    //  link.Send(2, state, 0);
-    //}
-    //else {
+    if (state > 0 && state < 6) {
+      link.Send(3, state, 0);
+    }
+    else if (state > 5 && state < 10) {
+      link.Send(2, state, 0);
+    }
+    else {
       DriveSend();
-    //}
+    }
   }
   
   digitalWrite(LEDB, link.online);
@@ -85,7 +85,6 @@ void RecData(byte i1, byte i2) {
 
 void DriveSend()
 {
-  digitalWrite(LEDA, 1);
   int vert_stick = analogRead(STICK_VERT);
   int gor_stick = analogRead(STICK_GOR);
   int motor1 = 0;

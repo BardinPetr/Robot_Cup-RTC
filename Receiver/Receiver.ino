@@ -1,6 +1,6 @@
 //PINs
 #define SERVOPIN 3
-#define LIGHTPIN 22
+#define LIGHTPIN 31
 //RANGES FOR SERVOS
 #define cMIN 0
 #define cMAX 90
@@ -13,7 +13,7 @@
 #include "DualVNH5019MotorShieldMega.h"
 
 DualVNH5019MotorShield mot;
-CatLink link(0x22, Serial);
+CatLink link(0x22);
 //Servo man;
 
 //SERVO VARs
@@ -41,14 +41,9 @@ void setup() {
 }
 
 void loop() {
-  //digitalWrite(13, link.online);
+  digitalWrite(13, link.online);
   if (link.st0(10)) {
     link.Read();
-    Drive(link.package[1], link.package[2]);
-    //Serial.print(link.package[1]);
-    //Serial.print(" ");
-    //Serial.println(link.package[2]);
-    
   }
 
   Activity();
@@ -56,7 +51,7 @@ void loop() {
 
 void Drive(byte speed1, byte speed2)
 {
-  digitalWrite(13, 1);
+  digitalWrite(LIGHTPIN, 0);
   speed1 = (int)((speed1 - 127) * 3.15);
   speed2 = (int)((speed2 - 127) * 3.15);
 
@@ -70,6 +65,7 @@ void Drive(byte speed1, byte speed2)
 }
 
 void Activity() {
+  digitalWrite(LIGHTPIN, 1);
   switch (actID) {
     case 1:
 
