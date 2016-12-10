@@ -1,27 +1,35 @@
 #include <catlink.h>
+#include <SoftwareSerial.h>
 
-#define BTN1            2
-#define BTN2            3
-#define BTN3            4
-#define BTN4            5
-#define BTNST           6
+#define BTN1            4
+#define BTN2            5
+#define BTN3            6
+#define BTN4            7
+#define BTNST           18
+
+#define LEDA            8
+#define LEDB            9
+#define LEDC            10
+#define LEDD            11
 
 #define STICK_VERT      A2
 #define STICK_GOR       A3
 
-#define MSTICK_VERT      A2
-#define MSTICK_GOR       A3
+#define MSTICK_VERT      A0
+#define MSTICK_GOR       A1
 
 bool sflag = false;
 
-CatLink link(0x22);
+SoftwareSerial sr(3,2);
+
+CatLink link(0x22, sr);
 
 int BTNID() {
-  if (digitalRead(BTN1)) return 1;
-  else if (digitalRead(BTN2)) return 2;
-  else if (digitalRead(BTN3)) return 3;
-  else if (digitalRead(BTN4)) return 4;
-  else if (digitalRead(BTNST)) return 5;
+  if (!digitalRead(BTN1)) return 1;
+  else if (!digitalRead(BTN2)) return 2;
+  else if (!digitalRead(BTN3)) return 3;
+  else if (!digitalRead(BTN4)) return 4;
+  else if (!digitalRead(BTNST)) return 5;
   else if (analogRead(MSTICK_GOR) > 800) return 6;
   else if (analogRead(MSTICK_GOR) < 200) return 7;
   else if (analogRead(MSTICK_VERT) > 800) return 8;
@@ -36,34 +44,39 @@ void setup()
   pinMode(BTN2, INPUT_PULLUP);
   pinMode(BTN3, INPUT_PULLUP);
   pinMode(BTN4, INPUT_PULLUP);
-  pinMode(BTNST, INPUT_PULLUP);
+  pinMode(BTNST, INPUT_PULLUP);  
+  
+  pinMode(LEDA, OUTPUT);
+  pinMode(LEDB, OUTPUT);
+  pinMode(LEDC, OUTPUT);
+  pinMode(LEDD, OUTPUT);
 
   Serial.begin(9600);
-
+  
   link.bind(1, RecData);
 }
 
 void loop()
 {
-  bool state = BTNID();
+  int state = 0;//BTNID();
 
   if (link.st0(200)){
     link.Read();
   }
   
   if (link.st1(10)) {
-    if (state > 0 && state < 6) {
-      link.Send(3, state, 0);
-    }
-    else if (state < 10) {
-      link.Send(2, state, 0);
-    }
-    else {
+    //if (state > 0 && state < 6) {
+    //  link.Send(3, state, 0);
+    //}
+    //else if (state < 10) {
+    //  link.Send(2, state, 0);
+    //}
+    //else {
       DriveSend();
-    }
+    //}
   }
   
-  digitalWrite(13, link.online);
+  digitalWrite(LEDB, link.online);
 }
 
 void RecData(byte i1, byte i2) {
@@ -72,6 +85,7 @@ void RecData(byte i1, byte i2) {
 
 void DriveSend()
 {
+  digitalWrite(LEDA, 1);
   int vert_stick = analogRead(STICK_VERT);
   int gor_stick = analogRead(STICK_GOR);
   int motor1 = 0;
