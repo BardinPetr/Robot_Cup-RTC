@@ -44,8 +44,8 @@ void CatLink::bind(byte opcode, OpcodeHandler handle)
 {
   if (cur_opcode_count < opcode_handlers_max)
   {
-    handlers[cur_opcode_count].handler = handle;
-    handlers[cur_opcode_count].opcode = opcode;
+    handlers[opcode].handler = handle;
+    handlers[opcode].opcode = opcode;
     cur_opcode_count++;
   }
 }
