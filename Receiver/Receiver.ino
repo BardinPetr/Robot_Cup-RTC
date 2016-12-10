@@ -8,7 +8,7 @@
 #define uMAX 180
 
 //INCLUDE
-#include <catlink.h>
+#include "catlinkm.h"
 #include <Servo.h>
 #include "DualVNH5019MotorShieldMega.h"
 
@@ -42,30 +42,40 @@ void setup() {
 
 void loop() {
   digitalWrite(13, link.online);
-  if (link.st0(10)) {
+  if (link.st0(100)) {
     link.Read();
   }
 
   Activity();
 }
 
-void Drive(byte speed1, byte speed2)
+void Drive(byte sp1, byte sp2)
 {
   digitalWrite(LIGHTPIN, 0);
-  speed1 = (int)((speed1 - 127) * 3.15);
-  speed2 = (int)((speed2 - 127) * 3.15);
+  
+  int speed1 = (int)(sp1);
+  int speed2 = (int)(sp2);
+  
+  speed1 = (int)((speed1 - 127) * 2);
+  speed2 = (int)((speed2 - 127) * 2);
+  
+  if (speed1 > 100)   speed1 = 100;
+  if (speed2 > 100)   speed2 = 100;
+  if (speed1 < -100)  speed1 = -100;
+  if (speed2 < -100)  speed2 = -100;
+  
+  if(speed1 < 30 && speed1 > -30) speed1 = 0;
+  if(speed2 < 30 && speed2 > -30) speed2  = 0;
 
-  if (speed1 > 400)speed1 = 400;
-  if (speed2 > 400)speed2 = 400;
-  if (speed1 < -400)speed1 = -400;
-  if (speed2 < -400)speed2 = -400;
-
-  mot.setM1Speed(speed1);
-  mot.setM2Speed(speed2);
+  //Serial.print(-speed1);
+  //Serial.print(" ");
+  //Serial.println(-speed2);
+  mot.setM1Speed(-speed1);
+  mot.setM2Speed(-speed2);
 }
 
 void Activity() {
-  digitalWrite(LIGHTPIN, 1);
+
   switch (actID) {
     case 1:
 
@@ -89,6 +99,7 @@ void Activity() {
 
 //Start another activity; keys: 1, 2, 3, 4, 5
 void RunM(byte i1, byte i2) {
+  digitalWrite(LIGHTPIN, 1);
   if (i1 = actID)
     actID = 0;
   else
@@ -141,5 +152,9 @@ void Down() {
   //man.write(uservo);
 }
 
-void light_on() {digitalWrite(LIGHTPIN, 1);}
-void light_off(){digitalWrite(LIGHTPIN, 0);}
+void light_on() {
+  digitalWrite(LIGHTPIN, 1);
+}
+void light_off() {
+  digitalWrite(LIGHTPIN, 0);
+}

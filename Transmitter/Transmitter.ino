@@ -12,8 +12,8 @@
 #define LEDC            10
 #define LEDD            11
 
-#define STICK_VERT      A2
-#define STICK_GOR       A3
+#define STICK_VERT      A3
+#define STICK_GOR       A2
 
 #define MSTICK_VERT      A0
 #define MSTICK_GOR       A1
@@ -59,21 +59,17 @@ void setup()
 void loop()
 {
   int state = BTNID();
-
-  if (link.st0(200)){
-    link.Read();
-  }
   
-  if (link.st1(10)) {
+  if (link.st1(150)) {/*
     if (state > 0 && state < 6) {
       link.Send(3, state, 0);
     }
     else if (state > 5 && state < 10) {
       link.Send(2, state, 0);
     }
-    else {
+    else {*/
       DriveSend();
-    }
+    //}
   }
   
   digitalWrite(LEDB, link.online);
@@ -90,11 +86,11 @@ void DriveSend()
   int motor1 = 0;
   int motor2 = 0;
 
-  vert_stick = map(vert_stick, 1023, 0, -255, 255);
+  vert_stick = map(vert_stick, 0, 1023, -255, 255);
   gor_stick = map(gor_stick, 0, 1023, -255, 255);
 
-  if (vert_stick > -5 && vert_stick < 5)vert_stick = 0;
-  if (gor_stick > -5 && gor_stick < 5)gor_stick = 0;
+  //if (vert_stick > -5 && vert_stick < 5)vert_stick = 0;
+  //if (gor_stick > -5 && gor_stick < 5)gor_stick = 0;
 
   motor1 = vert_stick - gor_stick;
   motor2 = vert_stick + gor_stick;
@@ -106,6 +102,22 @@ void DriveSend()
 
   motor1 = map(motor1, -255, 255, 0, 255);
   motor2 = map(motor2, -255, 255, 0, 255);
+  
+  if (motor1 > 255)   motor1 = 255;
+  if (motor2 > 255)   motor2 = 255;
+  if (motor1 < 0)  motor1 = 0;
+  if (motor2 < 0)  motor2 = 0;
 
+  if(motor2 < (motor1 + 10) && motor2 > (motor1 - 10)) motor2 = motor1;
+
+//  Serial.print((int)((motor1 - 127) * 2));
+//  Serial.print(" ");
+//  Serial.print((int)((motor2 - 127) * 2));  
+//  Serial.print("    ");
+//
+//  Serial.print(motor1);
+//  Serial.print(" ");
+//  Serial.println(motor2);
+  
   link.Send(1, motor1, motor2);
 }
