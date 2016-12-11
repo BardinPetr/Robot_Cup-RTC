@@ -22,7 +22,7 @@ bool sflag = false;
 int speedmode = 0;
 
 SoftwareSerial sr(3, 2);
-CatLink link(0x22, sr);
+CatLink link(0x22, Serial);
 
 int BTNID() {
   if (!digitalRead(BTN1)) return 1;
@@ -52,8 +52,8 @@ void setup()
   pinMode(LEDD, OUTPUT);
 
   Serial.begin(9600);
-
-  link.bind(1, RecData);
+  //sr.begin(9600);
+  //link.bind(1, RecData);
 }
 
 void loop() 
@@ -65,7 +65,8 @@ void loop()
     delay(300);
   }
   else if (state > 5 && state < 10) {
-    link.Send(3, state, 0);
+    link.Send(3, (byte)state, 0);
+    delay(300);
   }
   
   else {
