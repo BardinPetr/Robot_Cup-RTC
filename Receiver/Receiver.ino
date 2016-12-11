@@ -57,6 +57,8 @@ void setup() {
   link.bind(1, Drive);
   link.bind(2, RunM);
   link.bind(3, Manipulator);
+
+  link.setOnDisconnect(Disconnect);
 }
 
 void loop() {
@@ -248,6 +250,10 @@ void Drive(byte sp1, byte sp2)
 void motors(int i1, int i2) {
   mot.setM1Speed(-i1);
   mot.setM2Speed(-i2);
+}
+
+void Disconnect(){
+  motors(0, 0);
 }
 
 void Catch() {

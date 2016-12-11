@@ -27,6 +27,10 @@ CatLink::CatLink(byte id, HardwareSerial &theSerial) {
   Reset();
 }
 
+CatLink::setOnDisconnect(FuncHandler handler) {
+	DisconnectHandler = handler;
+}
+
 bool CatLink::st0(int stime)
 {
   bool result;

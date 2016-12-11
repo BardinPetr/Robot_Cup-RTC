@@ -15,6 +15,7 @@ class CatLink {
     
     static const byte opcode_handlers_max = 30;
     typedef void (*OpcodeHandler)(byte dataLow, byte dataHigh);         
+	typedef void (*FuncHandler)();         
     
     void Reset(void);
     void Send(int command_marker, int data1_byte, int data2_byte );
@@ -23,6 +24,8 @@ class CatLink {
 
     bool st0(int);
     bool st1(int);
+
+	void setOnDisconnect(FuncHandler handler);
 
     bool online = 0;
     byte package[3];
@@ -43,6 +46,7 @@ class CatLink {
       OpcodeHandler handler;
     };
 
-    Item handlers[opcode_handlers_max];    
+    Item handlers[opcode_handlers_max];  
+	FuncHandler DisconnectHandler;
 };
  
