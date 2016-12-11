@@ -6,11 +6,13 @@
 
 #include <avr/io.h>
 #include <arduino.h>
+#include <SoftwareSerial.h>
 
 class CatLink {
   public:
-    CatLink(byte id);
-
+    CatLink(byte id, SoftwareSerial &theSerial);
+    CatLink(byte id, HardwareSerial &theSerial);
+    
     static const byte opcode_handlers_max = 30;
     typedef void (*OpcodeHandler)(byte dataLow, byte dataHigh);         
     

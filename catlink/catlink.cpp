@@ -1,6 +1,31 @@
 #include "catlink.h"
+#include <SoftwareSerial.h>
 
 long int Clocks = 0, prevClocks = 0, Clocks2 = 0, prevClocks2 = 0;
+static HardwareSerial * hser = NULL;
+static SoftwareSerial * sser = NULL;
+bool sertype = 0;
+
+
+CatLink::CatLink(byte id, SoftwareSerial &theSerial) {
+  sser = &theSerial;
+  sser->begin(9600);
+  sertype = true;
+  id_device = id;
+  startMarker = 0xFF;
+  stopMarker = 0xFE;
+  Reset();
+}
+
+CatLink::CatLink(byte id, HardwareSerial &theSerial) {
+  hser = &theSerial;
+  hser->begin(9600);
+  sertype = false;
+  id_device = id;
+  startMarker = 0xFF;
+  stopMarker = 0xFE;
+  Reset();
+}
 
 bool CatLink::st0(int stime)
 {
@@ -32,14 +57,6 @@ bool CatLink::st1(int stime)
   return result;
 }
 
-
-CatLink::CatLink(byte id) {
-  id_device = id;
-  startMarker = 0xFF;
-  stopMarker = 0xFE;
-  Reset();
-}
-
 void CatLink::bind(byte opcode, OpcodeHandler handle)
 {
   if (cur_opcode_count < opcode_handlers_max)
@@ -67,21 +84,40 @@ void CatLink::Send(int command_marker, int data1_byte, int data2_byte ){
   byte data1_byteS = data1_byte;
   byte data2_byteS = data2_byte;
 
-  Serial.write(startMarker);
-  Serial.flush();
-  Serial.write(id_device);
-  Serial.flush();
-  Serial.write(command_markerS);
-  Serial.flush();
-  Serial.write(data1_byteS);
-  Serial.flush();
-  Serial.write(data2_byteS);
-  Serial.flush();
-  Serial.write(stopMarker);
-  Serial.flush();
+  if(!sertype){
+  hser->write(startMarker);
+  hser->flush();
+  hser->write(id_device);
+  hser->flush();
+  hser->write(command_markerS);
+  hser->flush();
+  hser->write(data1_byteS);
+  hser->flush();
+  hser->write(data2_byteS);
+  hser->flush();
+  hser->write(stopMarker);
+  hser->flush();
   check_summ = startMarker + id_device + command_marker + data1_byte + data2_byte + stopMarker;
-  Serial.write(check_summ);
-  Serial.flush();
+  hser->write(check_summ);
+  hser->flush();
+  }
+  else{
+  sser->write(startMarker);
+  sser->flush();
+  sser->write(id_device);
+  sser->flush();
+  sser->write(command_markerS);
+  sser->flush();
+  sser->write(data1_byteS);
+  sser->flush();
+  sser->write(data2_byteS);
+  sser->flush();
+  sser->write(stopMarker);
+  sser->flush();
+  check_summ = startMarker + id_device + command_marker + data1_byte + data2_byte + stopMarker;
+  sser->write(check_summ);
+  sser->flush();
+  }
 }
 
 void CatLink::Read(){
@@ -94,19 +130,21 @@ void CatLink::Read(){
     online = false;
   }
 
-  a = Serial.available();
+  if(sertype){
+
+  a = sser->available();
 
   if (a > 0)
   {
-    if ((RecieveBuf[0] = Serial.read()) == startMarker)
+    if ((RecieveBuf[0] = sser->read()) == startMarker)
     {
-      if ((RecieveBuf[1] = Serial.read()) == id_device)
+      if ((RecieveBuf[1] = sser->read()) != id_device)
       {
-        RecieveBuf[2] = Serial.read();
-        RecieveBuf[3] = Serial.read();
-        RecieveBuf[4] = Serial.read();
-        RecieveBuf[5] = Serial.read();
-        RecieveBuf[6] = Serial.read();
+        RecieveBuf[2] = sser->read();
+        RecieveBuf[3] = sser->read();
+        RecieveBuf[4] = sser->read();
+        RecieveBuf[5] = sser->read();
+        RecieveBuf[6] = sser->read();
 
         for (int i = 0; i < 6; i++)
         {
@@ -134,6 +172,49 @@ void CatLink::Read(){
   else {
     Reset();
   }
+}  else{
+
+  a = hser->available();
+
+  if (a > 0)
+  {
+    if ((RecieveBuf[0] = hser->read()) == startMarker)
+    {
+      if ((RecieveBuf[1] = hser->read()) == id_device)
+      {
+        RecieveBuf[2] = hser->read();
+        RecieveBuf[3] = hser->read();
+        RecieveBuf[4] = hser->read();
+        RecieveBuf[5] = hser->read();
+        RecieveBuf[6] = hser->read();
+
+        for (int i = 0; i < 6; i++)
+        {
+          CheckSummT += RecieveBuf[i];
+        }
+
+        if (CheckSummT == RecieveBuf[6])
+        {
+          for (int i = 0; i < 3; i++)
+          {
+            package[i] = RecieveBuf[i + 2];
+          }
+          lasttime = millis();
+          online = true;
+
+          handlers[package[0]].handler(package[1], package[2]);
+        }
+        else
+        {
+          Reset();
+        }
+      }
+    }
+  }
+  else {
+    Reset();
+  }
+}
 }
 
 void CatLink::on_receive(){

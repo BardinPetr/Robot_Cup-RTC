@@ -9,7 +9,7 @@
 #define UP         0
 
 //INCLUDE
-#include "catlinkm.h"
+#include <catlink.h>
 #include "DualVNH5019MotorShieldMega.h"
 #include <Servo.h>
 #include <NewPing.h>
@@ -17,7 +17,7 @@
 NewPing uS0(US0_TP, US1_EP, 200);
 DualVNH5019MotorShield mot;
 Servo srv;
-CatLink link(0x22);
+CatLink link(0x22, Serial1);
 
 //SERVO VARs
 int cservo = 0;

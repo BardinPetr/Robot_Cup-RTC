@@ -19,10 +19,10 @@
 #define MSTICK_GOR       A1
 
 bool sflag = false;
-
-//SoftwareSerial sr(3, 2);
 int speedmode = 0;
-CatLink link(0x22);
+
+SoftwareSerial sr(3, 2);
+CatLink link(0x22, sr);
 
 int BTNID() {
   if (!digitalRead(BTN1)) return 1;
