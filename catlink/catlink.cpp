@@ -132,6 +132,7 @@ void CatLink::Read(){
   if (millis() - lasttime > 1000)
   {
     online = false;
+    DisconnectHandler();
   }
 
   if(sertype){
