@@ -24,11 +24,16 @@ CatLink::CatLink(byte id, HardwareSerial &theSerial) {
   id_device = id;
   startMarker = 0xFF;
   stopMarker = 0xFE;
-  Reset();
+  Reset(); 
 }
 
-CatLink::setOnDisconnect(FuncHandler handler) {
+void CatLink::setOnDisconnect(FuncHandler handler) {
 	DisconnectHandler = handler;
+}
+
+void CatLink::clearBuffer(){
+	if(sertype) while (sser->available()) sser->read();
+	else        while (hser->available()) hser->read();
 }
 
 bool CatLink::st0(int stime)

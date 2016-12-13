@@ -26,7 +26,8 @@ class CatLink {
     bool st1(int);
 
 	void setOnDisconnect(FuncHandler handler);
-
+	void clearBuffer();
+	
     bool online = 0;
     byte package[3];
     
