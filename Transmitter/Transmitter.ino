@@ -22,7 +22,7 @@ bool sflag = false;
 int speedmode = 0;
 
 SoftwareSerial sr(3, 2);
-CatLink link(0x22, Serial);
+CatLink link(0x22, sr);
 
 int BTNID() {
   if (!digitalRead(BTN1)) return 1;
@@ -52,7 +52,7 @@ void setup()
   pinMode(LEDD, OUTPUT);
 
   Serial.begin(9600);
-  //sr.begin(9600);
+  sr.begin(9600);
   //link.bind(1, RecData);
 }
 
