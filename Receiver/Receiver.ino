@@ -13,8 +13,8 @@
 #define LC A4
 
 //RANGES FOR SERVOS
-#define DOWN       85
-#define MID        35
+#define DOWN       80
+#define MID        30
 #define UP         0
 
 //INCLUDE
@@ -22,26 +22,30 @@
 #include "DualVNH5019MotorShieldMega.h"
 #include <Servo.h>
 #include <NewPing.h>
+#include <Wire.h>
+#include <HMC58X3.h>
 
 NewPing uS0(US0_TP, US0_EP, 200);
 NewPing uS1(US1_TP, US1_EP, 200);
 NewPing uS2(US2_TP, US2_EP, 200);
 DualVNH5019MotorShield mot;
 Servo srv;
+HMC58X3 mag;
 CatLink link(0x22, Serial1);
 
-//SERVO VARs
 int cservo = 0;
 int uservo = 0;
 
 int actID = 0;
 
-//FLAGs
 bool lightflag = 0;
 int speedmode = 0;
 
 bool run1 = 0;
 bool run2 = 0;
+bool run3 = 0;
+
+int fix = 0;
 
 void setup() {
   Serial.begin(9600);
@@ -51,14 +55,23 @@ void setup() {
   pinMode(LLPIN, OUTPUT);
 
   mot.init();
-  //srv.attach(SERVOPIN);
-  //srv.write(0);
+
+  srv.attach(SERVOPIN);
+  srv.write(DOWN);
+
+  //Wire.begin();
+
+  //mag.init(false);
+  //mag.calibrate(1, 32);
+  //mag.setMode(0);
 
   link.bind(1, Drive);
   link.bind(2, RunM);
   link.bind(3, Manipulator);
 
   link.setOnDisconnect(Disconnect);
+
+  //setangle(90);
 }
 
 void loop() {
@@ -69,6 +82,42 @@ void loop() {
   }
 
   Activity();
+}
+
+void labirint() {
+  if (run3) {
+    if (ping1() > 10) {
+      motors(50, -50);
+      delay(1000);
+      motors(0, 0);
+    }
+    else if (ping0() > 10) {
+      motors(50, 50);
+      delay(1000);
+      motors(0, 0);
+    }
+    else {
+      motors(50, -50);
+      delay(1000);
+      motors(0, 0);
+    }
+  }
+}
+
+void setangle(int angle) {
+  fix = heading() + angle;
+  if (fix > 360) fix -= 360;
+}
+
+int heading() {
+  float fx, fy, fz;
+  mag.getValues(&fx, &fy, &fz);
+
+  float H = atan2(fy, fx);
+  if (H < 0) {
+    H += 2 * M_PI;
+  }
+  return (int)(H * 180 / M_PI);
 }
 
 void line_all() {
@@ -140,7 +189,7 @@ void tobanka() {
     if (ping0() < 4) {
       motors(0, 0);
       Catch();
-      delay(100);
+      delay(500);
       Up();
       run1 = 0;
       actID = 0;
@@ -166,7 +215,7 @@ void RunM(byte i1, byte i2) {
       run2 = !run2;
       break;
     case 3:
-
+      run3 = !run3;
       break;
     default:
       break;
@@ -182,7 +231,7 @@ void Activity() {
       line_all();
       break;
     case 3:
-
+      labirint();
       break;
     default:
       break;
@@ -252,20 +301,44 @@ void motors(int i1, int i2) {
   mot.setM2Speed(-i2);
 }
 
-void Disconnect(){
+void Disconnect() {
   motors(0, 0);
 }
 
 void Catch() {
+  srv.write(MID - 10);
+  delay(10);
+  srv.write(MID - 6);
+  delay(10);
+  srv.write(MID - 3);
+  delay(10);
   srv.write(MID);
 }
 void Release() {
+  srv.write(DOWN - 10);
+  delay(10);
+  srv.write(DOWN - 6);
+  delay(10);
+  srv.write(DOWN - 3);
+  delay(10);
   srv.write(DOWN);
 }
 void Up() {
+  srv.write(UP - 10);
+  delay(10);
+  srv.write(UP - 6);
+  delay(10);
+  srv.write(UP - 3);
+  delay(10);
   srv.write(UP);
 }
 void Down() {
+  srv.write(MID - 10);
+  delay(10);
+  srv.write(MID - 6);
+  delay(10);
+  srv.write(MID - 3);
+  delay(10);
   srv.write(MID);
 }
 
