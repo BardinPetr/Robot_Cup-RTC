@@ -193,29 +193,30 @@ void tobanka() {
       Up();
       run1 = 0;
       actID = 0;
+      link.clearBuffer();
     }
   }
 }
 
 //Start another activity; keys: 1, 2, 3, 4, 5
 void RunM(byte i1, byte i2) {
-  //digitalWrite(LLPIN, 1);
   actID = int(i1);
   if (actID == 5) {
-    speedmode = (speedmode == 1 ? 0 : 1);
-  }
-  if (actID == 4) {
-    speedmode = (speedmode == 2 ? 1 : 2);
+    speedmode = (speedmode == 0 ? 1 : (speedmode == 1 ? 2 : (speedmode == 2 ? 0 : 0)));
   }
   switch (i1) {
     case 1:
       run1 = !run1;
+      Release();
       break;
     case 2:
       run2 = !run2;
       break;
     case 3:
       run3 = !run3;
+      break;
+    case 4:
+      run4 = !run4;
       break;
     default:
       break;
@@ -231,7 +232,8 @@ void Activity() {
       line_all();
       break;
     case 3:
-      labirint();
+      break;
+    case 4:
       break;
     default:
       break;
