@@ -44,6 +44,7 @@ int speedmode = 0;
 bool run1 = 0;
 bool run2 = 0;
 bool run3 = 0;
+bool run4 = 0;
 
 int fix = 0;
 
@@ -198,6 +199,18 @@ void tobanka() {
   }
 }
 
+void tostenka() {
+  if (run3) {
+    motors(150, 150);
+    if (ping0() < 10) {
+      motors(0, 0);
+      run1 = 0;
+      actID = 0;
+      link.clearBuffer();
+    }
+  }
+}
+
 //Start another activity; keys: 1, 2, 3, 4, 5
 void RunM(byte i1, byte i2) {
   actID = int(i1);
@@ -232,6 +245,7 @@ void Activity() {
       line_all();
       break;
     case 3:
+      tostenka();
       break;
     case 4:
       break;
