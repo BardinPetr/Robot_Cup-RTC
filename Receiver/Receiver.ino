@@ -1,7 +1,9 @@
 //PINs
-#define SERVOPIN   3
+#define SERVOPINC  3
+#define SERVOPINU  3 //TODO
+
 #define LLPIN      31
-#define LaserPIN      32
+#define LaserPIN   32
 
 #define US0_TP     23
 #define US0_EP     22
@@ -10,14 +12,15 @@
 #define US2_TP     27
 #define US2_EP     26
 
-#define LR A3
-#define LL A2
-#define LC A4
+#define LR         A3
+#define LL         A2
+#define LC         A4
 
-//RANGES FOR SERVOS
-#define DOWN       80
-#define MID        30
-#define UP         0
+//RANGES FOR SERVOS //TODO
+#define S_CATCH    180
+#define S_RELEASE  0
+#define S_UP       180
+#define S_S_DOWN   0
 
 //INCLUDE
 #include <catlink.h>
@@ -30,9 +33,13 @@
 NewPing uS0(US0_TP, US0_EP, 200);
 NewPing uS1(US1_TP, US1_EP, 200);
 NewPing uS2(US2_TP, US2_EP, 200);
+
 DualVNH5019MotorShield mot;
-Servo srv;
+
+Servo srvC;
+Servo srvU;
 HMC58X3 mag;
+
 CatLink link(0x22, Serial1);
 
 int cservo = 0;
@@ -60,22 +67,23 @@ void setup() {
 
   mot.init();
 
-  srv.attach(SERVOPIN);
-  srv.write(DOWN);
+  srvc.attach(SERVOPINC);
+  srvc.write(S_RELEASE);
+  srvu.attach(SERVOPINU);
+  srvu.write(S_DOWN);
 
   //Wire.begin();
-
   //mag.init(false);
   //mag.calibrate(1, 32);
   //mag.setMode(0);
+  //setangle(90);
+
 
   link.bind(1, Drive);
   link.bind(2, RunM);
   link.bind(3, Manipulator);
 
   link.setOnDisconnect(Disconnect);
-
-  //setangle(90);
 }
 
 void loop() {
@@ -326,40 +334,20 @@ void Disconnect() {
 }
 
 void Catch() {
-  srv.write(MID - 10);
+  srvc.write(S_CATCH);
   delay(10);
-  srv.write(MID - 6);
-  delay(10);
-  srv.write(MID - 3);
-  delay(10);
-  srv.write(MID);
 }
 void Release() {
-  srv.write(DOWN - 10);
+  srvc.write(S_RELEASE);
   delay(10);
-  srv.write(DOWN - 6);
-  delay(10);
-  srv.write(DOWN - 3);
-  delay(10);
-  srv.write(DOWN);
 }
 void Up() {
-  srv.write(UP - 10);
+  srvu.write(S_UP);
   delay(10);
-  srv.write(UP - 6);
-  delay(10);
-  srv.write(UP - 3);
-  delay(10);
-  srv.write(UP);
 }
 void Down() {
-  srv.write(MID - 10);
+  srvu.write(S_DOWN);
   delay(10);
-  srv.write(MID - 6);
-  delay(10);
-  srv.write(MID - 3);
-  delay(10);
-  srv.write(MID);
 }
 
 int ping0() {
