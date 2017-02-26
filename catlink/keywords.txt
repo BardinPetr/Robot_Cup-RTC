@@ -1,0 +1,22 @@
+CatLink			KEYWORD4
+catlink			KEYWORD4
+
+setOnDisconnect		KEYWORD2
+
+st0			KEYWORD2
+st1			KEYWORD2
+
+Read			KEYWORD2
+online			KEYWORD2
+Reset			KEYWORD2
+Send			KEYWORD2
+
+bind			KEYWORD2
+clearBuffer		KEYWORD2
+
+package			KEYWORD2
+
+S_CATCH			LITERAL1
+S_RELEASE		LITERAL1
+S_UP			LITERAL1
+S_DOWN 			LITERAL1
