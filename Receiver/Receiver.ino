@@ -20,7 +20,7 @@
 #define S_CATCH    180
 #define S_RELEASE  0
 #define S_UP       180
-#define S_S_DOWN   0
+#define S_DOWN   0
 
 //INCLUDE
 #include <catlink.h>
