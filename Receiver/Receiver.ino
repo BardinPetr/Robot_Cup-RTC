@@ -1,6 +1,8 @@
 //PINs
 #define SERVOPIN   3
 #define LLPIN      31
+#define LaserPIN      32
+
 #define US0_TP     23
 #define US0_EP     22
 #define US1_TP     25
@@ -39,7 +41,7 @@ int uservo = 0;
 int actID = 0;
 
 bool lightflag = 0;
-int speedmode = 0;
+int speedmode = 1;
 
 bool run1 = 0;
 bool run2 = 0;
@@ -54,6 +56,7 @@ void setup() {
 
   pinMode(13, OUTPUT);
   pinMode(LLPIN, OUTPUT);
+  pinMode(LaserPIN, OUTPUT);
 
   mot.init();
 
@@ -77,6 +80,7 @@ void setup() {
 
 void loop() {
   digitalWrite(13, link.online);
+  digitalWrite(LaserPIN, run4);
 
   if (link.st0(100)) {
     link.Read();
