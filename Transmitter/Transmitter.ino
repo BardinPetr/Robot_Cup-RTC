@@ -22,6 +22,7 @@ bool sflag = false;
 int speedmode = 1;
 
 SoftwareSerial sr(3, 2);
+//SoftwareSerial sr2(12,13);
 CatLink link(0x22, sr);
 
 int BTNID() {
@@ -51,36 +52,38 @@ void setup()
   pinMode(LEDC, OUTPUT);
   pinMode(LEDD, OUTPUT);
 
-  Serial.begin(9600);
-  sr.begin(9600);
+  //Serial.begin(9600);
+  //sr.begin(9600);
+  //sr2.begin(9600);
   //link.bind(1, RecData);
 }
 
-void loop() 
+void loop()
 {
   int state = BTNID();
-  
+
   if (state > 0 && state < 6) {
     link.Send(2, state, 0);
-    if(state == 5) speedmode = (speedmode == 0 ? 1:(speedmode == 1 ? 2:(speedmode == 2 ? 0:0)));
+    if (state == 5) speedmode = (speedmode == 0 ? 1 : (speedmode == 1 ? 2 : (speedmode == 2 ? 0 : 0)));
     delay(300);
   }
   else if (state > 5 && state < 10) {
     link.Send(3, (byte)state, 0);
     delay(300);
   }
-  
+
   else {
     if (link.st1(100)) {
       DriveSend();
     }
   }
-  digitalWrite(LEDA, (speedmode == 2 ? 1:0));
-  digitalWrite(LEDC, (speedmode == 1 ? 1:0));
+  digitalWrite(LEDA, (speedmode == 2 ? 1 : 0));
+  digitalWrite(LEDC, (speedmode == 1 ? 1 : 0));
+  digitalWrite(LEDB, link.online);
 }
 
 void RecData(byte i1, byte i2) {
-  //digitalWrite(LEDB, link.online);
+  digitalWrite(LEDD, 1);
 }
 
 void DriveSend()

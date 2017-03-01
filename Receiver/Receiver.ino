@@ -36,8 +36,8 @@ NewPing uS2(US2_TP, US2_EP, 200);
 
 DualVNH5019MotorShield mot;
 
-Servo srvC;
-Servo srvU;
+Servo srvc;
+Servo srvu;
 HMC58X3 mag;
 
 CatLink link(0x22, Serial1);
@@ -59,7 +59,7 @@ int fix = 0;
 
 void setup() {
   Serial.begin(9600);
-  Serial1.begin(9600);
+  //Serial1.begin(9600);
 
   pinMode(13, OUTPUT);
   pinMode(LLPIN, OUTPUT);
@@ -72,13 +72,6 @@ void setup() {
   srvu.attach(SERVOPINU);
   srvu.write(S_DOWN);
 
-  //Wire.begin();
-  //mag.init(false);
-  //mag.calibrate(1, 32);
-  //mag.setMode(0);
-  //setangle(90);
-
-
   link.bind(1, Drive);
   link.bind(2, RunM);
   link.bind(3, Manipulator);
@@ -90,11 +83,23 @@ void loop() {
   digitalWrite(13, link.online);
   digitalWrite(LaserPIN, run4);
 
-  if (link.st0(100)) {
+  /*
+  if (link.st0(50)) {
     link.Read();
   }
-
+  if (link.st1(100)) {
+    //link.Send(1, 0, 0);
+    //Serial2.write(1);
+  }
+  */
+  
   Activity();
+
+  link.Run();
+}
+
+void serialEvent1() {
+  link.parseinput();
 }
 
 void labirint() {
