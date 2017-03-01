@@ -95,37 +95,37 @@ void CatLink::Send(int command_marker, int data1_byte, int data2_byte ){
 
   if(!sertype){
   hser->write(startMarker);
-  hser->flush();
+  //hser->flush();
   hser->write(id_device);
-  hser->flush();
+  //hser->flush();
   hser->write(command_markerS);
-  hser->flush();
+  //hser->flush();
   hser->write(data1_byteS);
-  hser->flush();
+  //hser->flush();
   hser->write(data2_byteS);
-  hser->flush();
-  hser->write(stopMarker);
-  hser->flush();
-  check_summ = startMarker + id_device + command_marker + data1_byte + data2_byte + stopMarker;
+  //hser->flush();
+  check_summ = (int)((startMarker + id_device + command_marker + data1_byte + data2_byte + stopMarker) / 6);
   hser->write(check_summ);
-  hser->flush();
+  //hser->flush();
+  hser->write(stopMarker);
+  //hser->flush();
   }
   else{
   sser->write(startMarker);
-  sser->flush();
+  //sser->flush();
   sser->write(id_device);
-  sser->flush();
+  //sser->flush();
   sser->write(command_markerS);
-  sser->flush();
+  //sser->flush();
   sser->write(data1_byteS);
-  sser->flush();
+  //sser->flush();
   sser->write(data2_byteS);
-  sser->flush();
-  sser->write(stopMarker);
-  sser->flush();
-  check_summ = startMarker + id_device + command_marker + data1_byte + data2_byte + stopMarker;
+  //sser->flush();
+  check_summ = (int)((startMarker + id_device + command_marker + data1_byte + data2_byte + stopMarker) / 6);
   sser->write(check_summ);
-  sser->flush();
+  //sser->flush();
+  sser->write(stopMarker);
+  //sser->flush();
   }
 }
 
@@ -145,7 +145,7 @@ void CatLink::Read(){
   a = sser->available();
 
   if (a > 0)
-  {
+  { 
     if ((RecieveBuf[0] = sser->read()) == startMarker)
     {
       if ((RecieveBuf[1] = sser->read()) != id_device)
@@ -225,8 +225,36 @@ void CatLink::Read(){
     Reset();
   }
 }
+clearBuffer();
 }
 
-void CatLink::on_receive(){
+void CatLink::parseinput(){
+  if(!sertype){ //hard
+    while (hser->available()) {
+      byte inChar = (byte)hser->read();
+      datain[rnum] = inChar;
 
+      if (inChar == stopMarker && rnum > 5) {
+        inComplete = true;
+        rnum = 0;
+      }
+      else
+        rnum++;
+    }
+  }
+}
+
+void CatLink::Run(){
+  if (datain[0] == startMarker && datain[6] == stopMarker && datain[1] == id_device)
+  {
+    for (int i = 0; i < 3; i++)
+    {
+      package[i] = datain[i + 2];
+    }
+
+    lasttime = millis();
+    online = true;
+
+    handlers[package[0]].handler(package[1], package[2]);
+  }
 }
