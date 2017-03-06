@@ -3,7 +3,7 @@
 #define START_MARKER 0xFF
 #define STOP_MARKER 0xFE
 #define DEVICE_ID 0x30
- 
+  
 #include <avr/io.h>
 #include <arduino.h>
 #include <SoftwareSerial.h>
@@ -21,12 +21,14 @@ class CatLink {
     void Send(int command_marker, int data1_byte, int data2_byte );
     void Read(void);
     void bind(byte opcode, OpcodeHandler handler);
+
     void Run();
     
     bool st0(int);
     bool st1(int);
 
     void parseinput();
+    void parseinput_s();
 
 	  void setOnDisconnect(FuncHandler handler);
 	  void clearBuffer();

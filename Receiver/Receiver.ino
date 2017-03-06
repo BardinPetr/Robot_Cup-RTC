@@ -58,8 +58,7 @@ bool run4 = 0;
 int fix = 0;
 
 void setup() {
-  Serial.begin(9600);
-  //Serial1.begin(9600);
+  //Serial.begin(9600);
 
   pinMode(13, OUTPUT);
   pinMode(LLPIN, OUTPUT);
@@ -83,16 +82,6 @@ void loop() {
   digitalWrite(13, link.online);
   digitalWrite(LaserPIN, run4);
 
-  /*
-  if (link.st0(50)) {
-    link.Read();
-  }
-  if (link.st1(100)) {
-    //link.Send(1, 0, 0);
-    //Serial2.write(1);
-  }
-  */
-  
   Activity();
 
   link.Run();
@@ -100,6 +89,7 @@ void loop() {
 
 void serialEvent1() {
   link.parseinput();
+  //link.Send(1, 0, 0);
 }
 
 void labirint() {

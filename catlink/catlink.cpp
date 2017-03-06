@@ -1,6 +1,6 @@
 #include "catlink.h"
 #include <SoftwareSerial.h>
-
+ 
 long int Clocks = 0, prevClocks = 0, Clocks2 = 0, prevClocks2 = 0;
 static HardwareSerial * hser = NULL;
 static SoftwareSerial * sser = NULL;
@@ -109,7 +109,7 @@ void CatLink::Send(int command_marker, int data1_byte, int data2_byte ){
   //hser->flush();
   hser->write(stopMarker);
   //hser->flush();
-  }
+  } 
   else{
   sser->write(startMarker);
   //sser->flush();
@@ -244,17 +244,43 @@ void CatLink::parseinput(){
   }
 }
 
-void CatLink::Run(){
-  if (datain[0] == startMarker && datain[6] == stopMarker && datain[1] == id_device)
-  {
-    for (int i = 0; i < 3; i++)
-    {
-      package[i] = datain[i + 2];
+void CatLink::parseinput_s(){
+  if(sertype){ //soft
+    while (sser->available()) {
+      byte inChar = (byte)sser->read();
+      datain[rnum] = inChar;
+
+      if (inChar == stopMarker && rnum > 5) {
+        inComplete = true;
+        rnum = 0;
+      }
+      else
+        rnum++;
     }
-
-    lasttime = millis();
-    online = true;
-
-    handlers[package[0]].handler(package[1], package[2]);
   }
+}
+
+void CatLink::Run(){
+  if (millis() - lasttime > 1000)
+  {
+    online = false;
+    DisconnectHandler();
+  }
+
+  if (inComplete){
+    if (datain[0] == startMarker && datain[6] == stopMarker && datain[1] == id_device)
+    {
+      for (int i = 0; i < 3; i++)
+      {
+        package[i] = datain[i + 2];
+      }
+
+      lasttime = millis();
+      online = true;
+      inComplete = false;
+      
+      handlers[package[0]].handler(package[1], package[2]);
+    }
+  }
+
 }
