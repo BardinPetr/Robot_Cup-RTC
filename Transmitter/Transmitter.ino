@@ -68,7 +68,7 @@ void loop()
   }
   else if (state > 5 && state < 10) {
     link.Send(3, (byte)state, 0);
-    delay(300);
+    delay(20);
   }
 
   else {

@@ -1,6 +1,6 @@
 //PINs
 #define SERVOPINC  3
-#define SERVOPINU  3 //TODO
+#define SERVOPINU  33 //TODO
 
 #define LLPIN      31
 #define LaserPIN   32
@@ -20,7 +20,7 @@
 #define S_CATCH    180
 #define S_RELEASE  0
 #define S_UP       180
-#define S_DOWN   0
+#define S_DOWN     0
 
 //INCLUDE
 #include <catlink.h>
@@ -57,6 +57,12 @@ bool run4 = 0;
 
 int fix = 0;
 
+int s1pos = S_RELEASE;
+int s2pos = S_UP;
+
+int sc1 = 5;
+int sc2 = 1;
+
 void setup() {
   //Serial.begin(9600);
 
@@ -69,7 +75,7 @@ void setup() {
   srvc.attach(SERVOPINC);
   srvc.write(S_RELEASE);
   srvu.attach(SERVOPINU);
-  srvu.write(S_DOWN);
+  srvu.write(S_UP);
 
   link.bind(1, Drive);
   link.bind(2, RunM);
@@ -83,13 +89,18 @@ void loop() {
   digitalWrite(LaserPIN, run4);
 
   Activity();
-
+  updateServo();
+  
   link.Run();
+}
+
+void updateServo(){
+  srvc.write(s1pos);
+  srvu.write(s2pos);
 }
 
 void serialEvent1() {
   link.parseinput();
-  //link.Send(1, 0, 0);
 }
 
 void labirint() {
@@ -223,6 +234,8 @@ void RunM(byte i1, byte i2) {
   actID = int(i1);
   if (actID == 5) {
     speedmode = (speedmode == 0 ? 1 : (speedmode == 1 ? 2 : (speedmode == 2 ? 0 : 0)));
+    sc1 = ((speedmode == 0 || speedmode == 1) ? 5 : 15);
+    sc2 = ((speedmode == 0 || speedmode == 1) ? 1 : 10);
   }
   switch (i1) {
     case 1:
@@ -264,17 +277,17 @@ void Activity() {
 //Manupulator action; keys: 6:OPEN, 7:CLOSE, 8:UP, 9:DOWN
 void Manipulator(byte i1, byte i2) {
   switch (i1) {
-    case 6:
-      Release();
-      break;
-    case 7:
-      Catch();
-      break;
     case 8:
-      Up();
+      Release_u();
       break;
     case 9:
-      Down();
+      Catch_u();
+      break;
+    case 6:
+      Up_u();
+      break;
+    case 7:
+      Down_u();
       break;
   }
 }
@@ -342,6 +355,32 @@ void Up() {
 }
 void Down() {
   srvu.write(S_DOWN);
+  delay(10);
+}
+
+//user servo cmd
+void Catch_u() {
+  s1pos -= sc1;
+  if(s1pos < S_CATCH)
+    s1pos = S_CATCH;
+  delay(10);
+}
+void Release_u() {  
+  s1pos += sc1;
+  if(s1pos > S_RELEASE)
+    s1pos = S_RELEASE;
+  delay(10);
+}
+void Up_u() {
+  s2pos += sc2;
+  if(s2pos > S_UP)
+    s2pos = S_UP;
+  delay(10);
+}
+void Down_u() {
+  s2pos -= sc2;
+  if(s2pos < S_DOWN)
+    s2pos = S_DOWN;
   delay(10);
 }
 
