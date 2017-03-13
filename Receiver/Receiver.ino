@@ -1,6 +1,6 @@
 //PINs
 #define SERVOPINC  3
-#define SERVOPINU  33 //TODO
+#define SERVOPINU  33
 
 #define LLPIN      31
 #define LaserPIN   32
@@ -16,11 +16,11 @@
 #define LL         A2
 #define LC         A4
 
-//RANGES FOR SERVOS //TODO
-#define S_CATCH    180
-#define S_RELEASE  0
+//RANGES FOR SERVOS
+#define S_CATCH    140
+#define S_RELEASE  20
 #define S_UP       180
-#define S_DOWN     0
+#define S_DOWN     20
 
 //INCLUDE
 #include <catlink.h>
@@ -61,7 +61,12 @@ int s1pos = S_RELEASE;
 int s2pos = S_UP;
 
 int sc1 = 5;
-int sc2 = 1;
+int sc2 = 2;
+
+int sc1_l = 1;
+int sc2_l = 5;
+int sc1_h = 1;
+int sc2_h = 5;
 
 void setup() {
   //Serial.begin(9600);
@@ -90,11 +95,11 @@ void loop() {
 
   Activity();
   updateServo();
-  
+
   link.Run();
 }
 
-void updateServo(){
+void updateServo() {
   srvc.write(s1pos);
   srvu.write(s2pos);
 }
@@ -207,12 +212,13 @@ void tobanka() {
     motors(50, 50);
     if (ping0() < 4) {
       motors(0, 0);
-      Catch();
-      delay(500);
-      Up();
+      Catch_c();
+      updateServo();
+      delay(300);
+      Up_c();
+      updateServo();
       run1 = 0;
       actID = 0;
-      link.clearBuffer();
     }
   }
 }
@@ -224,7 +230,6 @@ void tostenka() {
       motors(0, 0);
       run1 = 0;
       actID = 0;
-      link.clearBuffer();
     }
   }
 }
@@ -234,13 +239,18 @@ void RunM(byte i1, byte i2) {
   actID = int(i1);
   if (actID == 5) {
     speedmode = (speedmode == 0 ? 1 : (speedmode == 1 ? 2 : (speedmode == 2 ? 0 : 0)));
-    sc1 = ((speedmode == 0 || speedmode == 1) ? 5 : 15);
-    sc2 = ((speedmode == 0 || speedmode == 1) ? 1 : 10);
+    sc1 = ((speedmode == 0 || speedmode == 1) ? sc1_l : sc1_h);
+    sc2 = ((speedmode == 0 || speedmode == 1) ? sc2_l : sc2_h);
   }
   switch (i1) {
     case 1:
       run1 = !run1;
-      Release();
+      if (run1) {
+        Release();
+        updateServo();
+        Down();
+        updateServo();
+      }
       break;
     case 2:
       run2 = !run2;
@@ -277,16 +287,16 @@ void Activity() {
 //Manupulator action; keys: 6:OPEN, 7:CLOSE, 8:UP, 9:DOWN
 void Manipulator(byte i1, byte i2) {
   switch (i1) {
-    case 8:
+    case 6:
       Release_u();
       break;
-    case 9:
+    case 7:
       Catch_u();
       break;
-    case 6:
+    case 8:
       Up_u();
       break;
-    case 7:
+    case 9:
       Down_u();
       break;
   }
@@ -331,7 +341,7 @@ void Drive(byte sp1, byte sp2)
   mot.setM1Speed(-speed1);
   mot.setM2Speed(-speed2);
 }
-
+zcxx
 void motors(int i1, int i2) {
   mot.setM1Speed(-i1);
   mot.setM2Speed(-i2);
@@ -342,46 +352,44 @@ void Disconnect() {
 }
 
 void Catch() {
-  srvc.write(S_CATCH);
-  delay(10);
+  s1pos = S_CATCH;
+}
+void Catch_c() {
+  s1pos = ((S_CATCH - S_RELEASE) / 2);
 }
 void Release() {
-  srvc.write(S_RELEASE);
-  delay(10);
+  s1pos = S_RELEASE;
 }
 void Up() {
-  srvu.write(S_UP);
-  delay(10);
+  s2pos = S_UP;
+}
+void Up_c() {
+  s2pos = ((S_UP - S_DOWN) / 2);
 }
 void Down() {
-  srvu.write(S_DOWN);
-  delay(10);
+  s2pos = S_DOWN;
 }
 
 //user servo cmd
 void Catch_u() {
-  s1pos -= sc1;
-  if(s1pos < S_CATCH)
-    s1pos = S_CATCH;
-  delay(10);
-}
-void Release_u() {  
   s1pos += sc1;
-  if(s1pos > S_RELEASE)
+  if (s1pos > S_CATCH)
+    s1pos = S_CATCH;
+}
+void Release_u() {
+  s1pos -= sc1;
+  if (s1pos < S_RELEASE)
     s1pos = S_RELEASE;
-  delay(10);
 }
 void Up_u() {
   s2pos += sc2;
-  if(s2pos > S_UP)
+  if (s2pos > S_UP)
     s2pos = S_UP;
-  delay(10);
 }
 void Down_u() {
   s2pos -= sc2;
-  if(s2pos < S_DOWN)
+  if (s2pos < S_DOWN)
     s2pos = S_DOWN;
-  delay(10);
 }
 
 int ping0() {
