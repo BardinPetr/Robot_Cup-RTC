@@ -4,6 +4,7 @@
 
 #define LLPIN      31
 #define LaserPIN   32
+#define B          37
 
 #define US0_TP     23
 #define US0_EP     22
@@ -17,10 +18,10 @@
 #define LC         A4
 
 //RANGES FOR SERVOS
-#define S_CATCH    140
-#define S_RELEASE  20
+#define S_CATCH    151
+#define S_RELEASE  15
 #define S_UP       180
-#define S_DOWN     20
+#define S_DOWN     5
 
 //INCLUDE
 #include <catlink.h>
@@ -68,12 +69,15 @@ int sc2_l = 5;
 int sc1_h = 1;
 int sc2_h = 5;
 
+unsigned long ttt = 0;
+
 void setup() {
   //Serial.begin(9600);
 
   pinMode(13, OUTPUT);
   pinMode(LLPIN, OUTPUT);
   pinMode(LaserPIN, OUTPUT);
+  pinMode(B, OUTPUT);
 
   mot.init();
 
@@ -97,6 +101,12 @@ void loop() {
   updateServo();
 
   link.Run();
+
+  if(!link.online && link.st0(1000)){
+    digitalWrite(B, 1);
+    delay(500);    
+    digitalWrite(B, 0);
+  }
 }
 
 void updateServo() {
@@ -341,7 +351,7 @@ void Drive(byte sp1, byte sp2)
   mot.setM1Speed(-speed1);
   mot.setM2Speed(-speed2);
 }
-zcxx
+
 void motors(int i1, int i2) {
   mot.setM1Speed(-i1);
   mot.setM2Speed(-i2);
